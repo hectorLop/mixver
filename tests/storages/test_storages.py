@@ -1,19 +1,47 @@
-import pytest
+import os
+import shutil
 
 from mixver.storages.local_storage import LocalStorage
 
 
 def test_local_storage_creation():
-    assert True == False
+    """
+    Test the creation of a LocalStorage in an exising folder.
+    """
+    folder = "~/Data/prueba_storage"
+    os.makedirs(folder)
+
+    storage = LocalStorage(folder)
+
+    assert storage.storage_path == folder
+
+    shutil.rmtree(folder)
 
 
 def test_local_storage_creation_new_folder():
-    assert True == False
+    """
+    Test the creation of a LocalStorage in a new folder.
+    """
+    folder = "~/Data/prueba_storage_new"
+    os.makedirs(folder)
+
+    storage = LocalStorage(folder)
+
+    assert storage.storage_path == folder
+    assert os.path.isdir(folder)
+
+    shutil.rmtree(folder)
 
 
 def test_local_storage_push():
-    assert True == False
+    """
+    Test saving data into the storage.
+    """
+    assert False
 
 
 def test_local_storage_pull():
-    assert True == False
+    """
+    Test retrieving data from the storage.
+    """
+    assert False
