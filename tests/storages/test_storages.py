@@ -49,7 +49,7 @@ def test_local_storage_push():
 
     storage = LocalStorage(folder)
     artifact_path = Path(folder, "artifact.pkl")
-    storage.push(artifact=MockArtifact, path=artifact_path, metadata={"score": 0.9})
+    storage.push(artifact=MockArtifact(), path=artifact_path, metadata={"score": 0.9})
 
     assert os.path.isfile(artifact_path)
 
@@ -66,4 +66,22 @@ def test_local_storage_pull():
     """
     Test retrieving data from the storage.
     """
-    assert False
+    folder = Path(ROOT, "prueba_storage")
+    os.makedirs(folder)
+
+    storage = LocalStorage(folder)
+    artifact_path = Path(folder, "artifact.pkl")
+    data = {
+        "artifact": MockArtifact(),
+        "metadata": {"score": 0.9},
+    }
+
+    with open(artifact_path, "wb") as file:
+        pickle.dump(data, file)
+
+    saved_artifact = storage.pull("artifact.pkl")
+
+    assert saved_artifact["artifact"].name == "LinearRegression"
+    assert saved_artifact["metadata"]["score"] == 0.9
+
+    shutil.rmtree(folder)

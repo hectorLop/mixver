@@ -1,5 +1,6 @@
 import os
 import pickle
+from pathlib import Path
 from typing import Any, Dict
 
 
@@ -46,7 +47,13 @@ class LocalStorage:
         with open(path, "wb") as file:
             pickle.dump(data, file)
 
-    def pull(self) -> None:
+    def pull(self, name: str) -> Dict:
         """
         Retrieve data from the storage.
         """
+        path = Path(self._storage_path, name)
+
+        with open(path, "rb") as file:
+            data = pickle.load(file)
+
+        return data
