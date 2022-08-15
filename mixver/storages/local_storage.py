@@ -1,4 +1,6 @@
 import os
+import pickle
+from typing import Any, Dict
 
 
 class LocalStorage:
@@ -32,10 +34,17 @@ class LocalStorage:
         if not os.path.isdir(self._storage_path):
             os.mkdir(self._storage_path)
 
-    def push(self) -> None:
+    def push(self, artifact: Any, path: str, metadata: Dict) -> None:
         """
         Save data into the storage.
         """
+        data = {
+            "artifact": artifact,
+            "metadata": metadata,
+        }
+        # TODO: Check that the path is valid and ends up with a .pkl
+        with open(path, "wb") as file:
+            pickle.dump(data, file)
 
     def pull(self) -> None:
         """

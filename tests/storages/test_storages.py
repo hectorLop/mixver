@@ -1,14 +1,21 @@
 import os
+import pickle
 import shutil
+from pathlib import Path
 
+from mixver.config import ROOT
 from mixver.storages.local_storage import LocalStorage
+
+
+class MockArtifact:
+    name: str = "LinearRegression"
 
 
 def test_local_storage_creation():
     """
     Test the creation of a LocalStorage in an exising folder.
     """
-    folder = "~/Data/prueba_storage"
+    folder = Path(ROOT, "prueba_storage")
     os.makedirs(folder)
 
     storage = LocalStorage(folder)
@@ -22,7 +29,7 @@ def test_local_storage_creation_new_folder():
     """
     Test the creation of a LocalStorage in a new folder.
     """
-    folder = "~/Data/prueba_storage_new"
+    folder = Path(ROOT, "prueba_storage_new")
     os.makedirs(folder)
 
     storage = LocalStorage(folder)
@@ -37,7 +44,22 @@ def test_local_storage_push():
     """
     Test saving data into the storage.
     """
-    assert False
+    folder = Path(ROOT, "prueba_storage")
+    os.makedirs(folder)
+
+    storage = LocalStorage(folder)
+    artifact_path = Path(folder, "artifact.pkl")
+    storage.push(artifact=MockArtifact, path=artifact_path, metadata={"score": 0.9})
+
+    assert os.path.isfile(artifact_path)
+
+    with open(artifact_path, "rb") as file:
+        artifact = pickle.load(file)
+
+    assert artifact["artifact"].name == "LinearRegression"
+    assert artifact["metadata"]["score"] == 0.9
+
+    shutil.rmtree(folder)
 
 
 def test_local_storage_pull():
