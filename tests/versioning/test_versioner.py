@@ -24,47 +24,41 @@ def test_versioner_new_storage():
     shutil.rmtree(storage_path)
 
 
-def test_versioner_existant_storage():
+def test_versioner_existant_storage(test_folder):
     """
     Test the versioner on a existant storage.
     """
-    storage_path = Path(ROOT, "prueba_versioner")
-    os.makedirs(storage_path)
-
-    # Create the files beforehand to check if the versioner truncates them
-    with open(Path(storage_path, ".versions.json"), "w") as file:
-        data = {"key": 1}
-        json.dump(data, file)
-    with open(Path(storage_path, ".tags.json"), "w") as file:
-        data = {"key": 1}
-        json.dump(data, file)
+    storage_path, expected_name, tag_name = test_folder
 
     versioner = Versioner(storage_path=storage_path)
 
     # Check that the versioner hasn't truncated the existing files
     with open(Path(storage_path, ".versions.json"), "r") as file:
         data = json.load(file)
-        assert data["key"] == 1
+        assert list(data.keys())[0] == expected_name
+        assert list(data[expected_name].keys())[0] == "1"
+        assert data[expected_name]["1"] == f"{expected_name}_1"
+
     with open(Path(storage_path, ".tags.json"), "r") as file:
         data = json.load(file)
-        assert data["key"] == 1
+        assert list(data.keys())[0] == tag_name
+        assert list(data[tag_name].keys())[0] == expected_name
+        assert data[tag_name][expected_name] == {"1": f"{expected_name}_1"}
 
     shutil.rmtree(storage_path)
 
 
-def test_versioner_add_new_artifact():
+def test_versioner_add_new_artifact(test_folder):
     """
     Test adding a new artifact
     """
-    storage_path = Path(ROOT, "prueba_versioner")
-    os.makedirs(storage_path)
+    storage_path, _, _ = test_folder
 
     versioner = Versioner(storage_path=storage_path)
-    filename = versioner.add_artifact("artifact")
-
+    filename = versioner.add_artifact("artifact2")
     hashed_name, version = filename.split("_")
 
-    assert hashed_name == str(hash("artifact"))
+    assert hashed_name == str(hash("artifact2"))
     assert version == "1"
 
     with open(Path(storage_path, ".versions.json"), "r") as file:
@@ -77,28 +71,17 @@ def test_versioner_add_new_artifact():
     shutil.rmtree(storage_path)
 
 
-def test_versioner_add_existing_artifact():
+def test_versioner_add_existing_artifact(test_folder):
     """
     Test adding a new artifact
     """
-    storage_path = Path(ROOT, "prueba_versioner")
-    os.makedirs(storage_path)
+    storage_path, expected_name, _ = test_folder
 
     versioner = Versioner(storage_path=storage_path)
-    expected_hashed_name = str(hash("artifact"))
-    old_version = "1"
-    data = {
-        expected_hashed_name: {old_version: f"{expected_hashed_name}_{old_version}"}
-    }
-
-    with open(Path(storage_path, ".versions.json"), "w") as file:
-        json.dump(data, file)
-
     filename = versioner.add_artifact("artifact")
-
     hashed_name, version = filename.split("_")
 
-    assert hashed_name == expected_hashed_name
+    assert hashed_name == expected_name
     assert version == "2"
 
     with open(Path(storage_path, ".versions.json"), "r") as file:
