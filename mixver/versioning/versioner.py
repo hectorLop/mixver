@@ -188,16 +188,24 @@ class Versioner:
 
         return filename
 
-    def get_artifact_by_tag(self, name: str, tag: str) -> str:
+    def get_artifact_by_tag(self, tag: str) -> str:
         """
         Retrieves an artifact by its version. If the version is empty, the
         latest version will be returned.
 
         Args:
-            name (str): Artifact's name.
-            version (str): Artifact's version. Default is empty.
+            tag (str): Tag assigned to the desired artifact.
 
         Returns:
             str: Artifact's filepath.
         """
-        raise NotImplementedError
+        with open(Path(self.storage_path, self._tags_file), "r") as file:
+            tags_data = json.load(file)
+
+        if tag not in tags_data:
+            raise ArtifactDoesNotExist(tag, is_tag=True)
+
+        hashed_name = list(tags_data[tag].keys())[0]
+        filename = list(tags_data[tag][hashed_name].values())[0]
+
+        return filename
