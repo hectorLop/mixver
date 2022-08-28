@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-from mixver.versioning.exceptions import ArtifactNotExist
+from mixver.versioning.exceptions import ArtifactDoesNotExist
 from mixver.versioning.utils import hash
 
 
@@ -85,13 +85,23 @@ class Versioner:
         return filename
 
     def update_tags(self, name: str, tags: list[str], version: str = "") -> None:
+        """
+        Update the tags with a given artifact. In the case that no version is passed,
+        it uses the latest version of that artifact.
+
+        Args:
+            name (str): Artifact's name.
+            tags (list[str]): List of tags to be updated.
+            version (str): Artifact's version. Default is empty, which means the
+                latest version of the artifact will be used.
+        """
         with open(Path(self.storage_path, self._version_file), "r") as file:
             version_data = json.load(file)
 
         hashed_name = hash(name)
 
         if hashed_name not in version_data:
-            raise ArtifactNotExist(name)
+            raise ArtifactDoesNotExist(name)
 
         if not version:
             versions = version_data[hashed_name].keys()
@@ -101,7 +111,7 @@ class Versioner:
             versions = version_data[hashed_name].keys()
 
             if not version in versions:
-                raise ArtifactNotExist(name)
+                raise ArtifactDoesNotExist(name)
 
         with open(Path(self.storage_path, self._tags_file), "r") as file:
             tags_data = json.load(file)
@@ -113,10 +123,41 @@ class Versioner:
             json.dump(tags_data, file)
 
     def remove_artifact(self, name: str) -> None:
-        pass
+        """
+        Remove an artifact from the registry.
 
-    def get_artifact_by_version(self, name: str, version: int) -> str:
-        pass
+        Args:
+            name (str): Artifact's name.
+        """
+        # TODO: Remove the artifact from the versions
+        # TODO: Remove the artifact from the tags
+        raise NotImplementedError
+
+    def get_artifact_by_version(self, name: str, version: str = "") -> str:
+        """
+        Retrieves an artifact by its version. If the version is empty, the
+        latest version will be returned.
+
+        Args:
+            name (str): Artifact's name.
+            version (str): Artifact's version. Default is empty.
+
+        Returns:
+            str: Artifact's filepath.
+        """
+        # TODO: Check the key is in the versions. Otherwise raise ArtifactDoesNotExist
+        raise NotImplementedError
 
     def get_artifact_by_tag(self, name: str, tag: str) -> str:
+        """
+        Retrieves an artifact by its version. If the version is empty, the
+        latest version will be returned.
+
+        Args:
+            name (str): Artifact's name.
+            version (str): Artifact's version. Default is empty.
+
+        Returns:
+            str: Artifact's filepath.
+        """
         raise NotImplementedError

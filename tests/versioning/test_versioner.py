@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from mixver.config import ROOT
-from mixver.versioning.exceptions import ArtifactNotExist
+from mixver.versioning.exceptions import ArtifactDoesNotExist
 from mixver.versioning.utils import hash
 from mixver.versioning.versioner import Versioner
 
@@ -125,7 +125,7 @@ def test_update_tags_artifact_not_exist(test_folder):
 
     versioner = Versioner(storage_path=storage_path)
 
-    with pytest.raises(ArtifactNotExist):
+    with pytest.raises(ArtifactDoesNotExist):
         versioner.update_tags(name="not_exist_artifact", tags=[tag_name])
 
     shutil.rmtree(storage_path)
@@ -139,7 +139,7 @@ def test_update_tags_artifact_version_not_exist(test_folder):
 
     versioner = Versioner(storage_path=storage_path)
 
-    with pytest.raises(ArtifactNotExist):
+    with pytest.raises(ArtifactDoesNotExist):
         versioner.update_tags(name="test_artifact", tags=[tag_name], version="14")
 
     shutil.rmtree(storage_path)
