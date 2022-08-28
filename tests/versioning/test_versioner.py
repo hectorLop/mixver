@@ -179,3 +179,36 @@ def test_remove_unexisting_artifact(test_folder):
         versioner.remove_artifact("not_exist_artifact")
 
     shutil.rmtree(storage_path)
+
+
+@pytest.mark.parametrize("version", ["1", ""])
+def test_get_artifact_by_version(test_folder, version):
+    """
+    Test the retrieval of an artifact by its version.
+    """
+    storage_path, _, _ = test_folder
+
+    versioner = Versioner(storage_path=storage_path)
+    expected_filename = f"{hash('artifact')}_1"
+
+    actual_filename = versioner.get_artifact_by_version(
+        name="artifact", version=version
+    )
+
+    assert actual_filename == expected_filename
+
+    shutil.rmtree(storage_path)
+
+
+def test_get_artifact_by_version_exception(test_folder):
+    """
+    Test the retrieval of an artifact that doesn't exist by its version.
+    """
+    storage_path, _, _ = test_folder
+
+    versioner = Versioner(storage_path=storage_path)
+
+    with pytest.raises(ArtifactDoesNotExist):
+        versioner.get_artifact_by_version("not_existant_artifact")
+
+    shutil.rmtree(storage_path)

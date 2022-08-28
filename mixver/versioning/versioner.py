@@ -166,8 +166,27 @@ class Versioner:
         Returns:
             str: Artifact's filepath.
         """
-        # TODO: Check the key is in the versions. Otherwise raise ArtifactDoesNotExist
-        raise NotImplementedError
+        with open(Path(self.storage_path, self._version_file), "r") as file:
+            version_data = json.load(file)
+
+        hashed_name = hash(name)
+
+        if hashed_name not in version_data:
+            raise ArtifactDoesNotExist(name)
+
+        if not version:
+            versions = version_data[hashed_name].keys()
+            versions = list(map(int, versions))
+            version = str(max(versions))
+        else:
+            versions = version_data[hashed_name].keys()
+
+            if not version in versions:
+                raise ArtifactDoesNotExist(name)
+
+        filename = version_data[hashed_name][version]
+
+        return filename
 
     def get_artifact_by_tag(self, name: str, tag: str) -> str:
         """
