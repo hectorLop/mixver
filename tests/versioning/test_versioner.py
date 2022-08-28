@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from cgi import test
 from pathlib import Path
 
 import pytest
@@ -35,7 +36,7 @@ def test_versioner_existant_storage(test_folder):
     # Check that the versioner hasn't truncated the existing files
     with open(Path(storage_path, ".versions.json"), "r") as file:
         data = json.load(file)
-        assert list(data.keys())[0] == expected_name
+        assert expected_name in data.keys()
         assert list(data[expected_name].keys())[0] == "1"
         assert data[expected_name]["1"] == f"{expected_name}_1"
 
@@ -92,3 +93,17 @@ def test_versioner_add_existing_artifact(test_folder):
         assert data[hashed_name][version] == filename
 
     shutil.rmtree(storage_path)
+
+
+# def test_update_tags(test_folder):
+#     storage_path, expected_name, tag_name = test_folder
+#     versioner = Versioner(storage_path=storage_path)
+#     versioner.update_tags(name='artifact', tags=['tag_prueba'])
+
+#     with open(Path(storage_path, ".versions.json"), "r") as file:
+#         data = json.load()
+
+#         assert '2' in data[expected_name]
+#         assert data[expected_name] == {'2': f'{expected_name}_2'}
+
+#     shutil.rmtree(storage_path)

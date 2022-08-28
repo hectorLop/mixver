@@ -13,11 +13,13 @@ def test_folder():
     os.makedirs(storage_path)
 
     artifact_name = str(hash("artifact"))
+    test_artifact_name = str(hash("test_artifact"))
     tag_name = "tag_prueba"
 
     # Create the files beforehand to check if the versioner truncates them
     with open(Path(storage_path, ".versions.json"), "w") as file:
         data = {artifact_name: {"1": f"{artifact_name}_1"}}
+        data[test_artifact_name] = {"1": f"{test_artifact_name}_1"}
         json.dump(data, file)
 
     with open(Path(storage_path, ".tags.json"), "w") as file:
