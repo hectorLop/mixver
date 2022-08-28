@@ -10,7 +10,12 @@ class ArtifactDoesNotExist(Exception):
         message (str): Exception's message.
     """
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, is_tag: bool = False) -> None:
         self.name = name
-        self.message = f"The '{name}' artifact doesn't exist"
+
+        if is_tag:
+            self.message = f"The '{name}' tag doesn't exist"
+        else:
+            self.message = f"The '{name}' artifact doesn't exist"
+
         super().__init__(self.message)
