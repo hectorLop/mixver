@@ -4,6 +4,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+from mixver.versioning.exceptions import ArtifactNotExist
+from mixver.versioning.utils import hash
+
 
 @dataclass(frozen=True)
 class Versioner:
@@ -53,7 +56,7 @@ class Versioner:
             except json.decoder.JSONDecodeError:
                 version_data = {}
 
-        hashed_name = str(hash(name))
+        hashed_name = hash(name)
 
         if hashed_name in version_data:
             versions = version_data[hashed_name].keys()
@@ -74,18 +77,46 @@ class Versioner:
                 tags_data = json.load(file)
 
             for tag in tags:
-                if tag not in data:
+                if tag not in tags_data:
                     tags_data[tag] = {tag: {hashed_name: {new_version: filename}}}
                 else:
                     tags_data[tag] = {hashed_name: {new_version: filename}}
 
         return filename
 
-    def update(self):
+    def update_tags(self, name: str, tags: list[str], version: str = "") -> None:
+        with open(Path(self.storage_path, self._version_file), "r") as file:
+            version_data = json.load(file)
+
+        hashed_name = hash(name)
+
+        if hashed_name not in version_data:
+            raise ArtifactNotExist(name)
+
+        if not version:
+            versions = version_data[hashed_name].keys()
+            versions = list(map(int, versions))
+            version = max(versions)
+        else:
+            versions = version_data[hashed_name].keys()
+
+            if not version in versions:
+                raise ArtifactNotExist(name)
+
+        with open(Path(self.storage_path, self._tags_file), "r") as file:
+            tags_data = json.load(file)
+
+        for tag in tags:
+            tags_data[tag] = {hashed_name: {version: f"{hashed_name}_{version}"}}
+
+        with open(Path(self.storage_path, self._tags_file), "w") as file:
+            json.dump(tags_data, file)
+
+    def remove_artifact(self, name: str) -> None:
         pass
 
-    def remove(self):
+    def get_artifact_by_version(self, name: str, version: int) -> str:
         pass
 
-    def get(self):
-        pass
+    def get_artifact_by_tag(self, name: str, tag: str) -> str:
+        raise NotImplementedError

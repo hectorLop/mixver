@@ -1,12 +1,13 @@
 import json
 import os
 import shutil
-from cgi import test
 from pathlib import Path
 
 import pytest
 
 from mixver.config import ROOT
+from mixver.versioning.exceptions import ArtifactNotExist
+from mixver.versioning.utils import hash
 from mixver.versioning.versioner import Versioner
 
 
@@ -59,7 +60,7 @@ def test_versioner_add_new_artifact(test_folder):
     filename = versioner.add_artifact("artifact2")
     hashed_name, version = filename.split("_")
 
-    assert hashed_name == str(hash("artifact2"))
+    assert hashed_name == hash("artifact2")
     assert version == "1"
 
     with open(Path(storage_path, ".versions.json"), "r") as file:
@@ -95,15 +96,50 @@ def test_versioner_add_existing_artifact(test_folder):
     shutil.rmtree(storage_path)
 
 
-# def test_update_tags(test_folder):
-#     storage_path, expected_name, tag_name = test_folder
-#     versioner = Versioner(storage_path=storage_path)
-#     versioner.update_tags(name='artifact', tags=['tag_prueba'])
+def test_update_tags(test_folder):
+    """
+    Test updating the tags of an existing artifact.
+    """
+    storage_path, _, tag_name = test_folder
 
-#     with open(Path(storage_path, ".versions.json"), "r") as file:
-#         data = json.load()
+    versioner = Versioner(storage_path=storage_path)
+    versioner.update_tags(name="test_artifact", tags=[tag_name])
+    expected_name = hash("test_artifact")
 
-#         assert '2' in data[expected_name]
-#         assert data[expected_name] == {'2': f'{expected_name}_2'}
+    with open(Path(storage_path, ".tags.json"), "r") as file:
+        data = json.load(file)
 
-#     shutil.rmtree(storage_path)
+        assert tag_name in data
+        assert expected_name in data[tag_name]
+        assert "1" in data[tag_name][expected_name]
+        assert data[tag_name][expected_name] == {"1": f"{expected_name}_1"}
+
+    shutil.rmtree(storage_path)
+
+
+def test_update_tags_artifact_not_exist(test_folder):
+    """
+    Test the exception raises when the artifact doesn't exist.
+    """
+    storage_path, _, tag_name = test_folder
+
+    versioner = Versioner(storage_path=storage_path)
+
+    with pytest.raises(ArtifactNotExist):
+        versioner.update_tags(name="not_exist_artifact", tags=[tag_name])
+
+    shutil.rmtree(storage_path)
+
+
+def test_update_tags_artifact_version_not_exist(test_folder):
+    """
+    Test the exception raises when the artifact version doesn't exist.
+    """
+    storage_path, _, tag_name = test_folder
+
+    versioner = Versioner(storage_path=storage_path)
+
+    with pytest.raises(ArtifactNotExist):
+        versioner.update_tags(name="test_artifact", tags=[tag_name], version="14")
+
+    shutil.rmtree(storage_path)
