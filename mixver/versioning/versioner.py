@@ -130,8 +130,29 @@ class Versioner:
             name (str): Artifact's name.
         """
         # TODO: Remove the artifact from the versions
-        # TODO: Remove the artifact from the tags
-        raise NotImplementedError
+        with open(Path(self.storage_path, self._version_file), "r") as file:
+            version_data = json.load(file)
+
+        hashed_name = hash(name)
+
+        if hashed_name not in version_data:
+            raise ArtifactDoesNotExist(name)
+        else:
+            del version_data[hashed_name]
+
+        with open(Path(self.storage_path, self._version_file), "w") as file:
+            json.dump(version_data, file)
+
+        with open(Path(self.storage_path, self._tags_file), "r") as file:
+            tags_data = json.load(file)
+
+        print(tags_data)
+        for tag in tags_data.keys():
+            if hashed_name in tags_data[tag]:
+                del tags_data[tag][hashed_name]
+
+        with open(Path(self.storage_path, self._tags_file), "w") as file:
+            json.dump(tags_data, file)
 
     def get_artifact_by_version(self, name: str, version: str = "") -> str:
         """

@@ -143,3 +143,39 @@ def test_update_tags_artifact_version_not_exist(test_folder):
         versioner.update_tags(name="test_artifact", tags=[tag_name], version="14")
 
     shutil.rmtree(storage_path)
+
+
+def test_remove_artifact(test_folder):
+    """
+    Test removing an existing artifact.
+    """
+    storage_path, _, _ = test_folder
+
+    versioner = Versioner(storage_path=storage_path)
+    versioner.remove_artifact("artifact")
+
+    name = hash("artifact")
+
+    with open(Path(storage_path, ".versions.json"), "r") as file:
+        data = json.load(file)
+        assert name not in data
+
+    with open(Path(storage_path, ".tags.json"), "r") as file:
+        data = json.load(file)
+        assert data["tag_prueba"] == {}
+
+    shutil.rmtree(storage_path)
+
+
+def test_remove_unexisting_artifact(test_folder):
+    """
+    Test removing an artifact that doesn't exist.
+    """
+    storage_path, _, _ = test_folder
+
+    versioner = Versioner(storage_path=storage_path)
+
+    with pytest.raises(ArtifactDoesNotExist):
+        versioner.remove_artifact("not_exist_artifact")
+
+    shutil.rmtree(storage_path)
