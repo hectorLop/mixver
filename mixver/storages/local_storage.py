@@ -1,14 +1,13 @@
 import os
 import pickle
-from ctypes import Union
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 from mixver.versioning.versioner import Versioner
 
 
-@dataclass(frozen=True)
+@dataclass
 class LocalStorage:
     """
     Local storage to version ML models.
@@ -60,9 +59,10 @@ class LocalStorage:
 
         filename = self._versioner.add_artifact(name=name, tags=tags)
 
-        # TODO: Check that the path is valid and ends up with a .pkl
-        with open(f"{filename}.pkl", "wb") as file:
+        with open(Path(self._storage_path, f"{filename}.pkl"), "wb") as file:
             pickle.dump(data, file)
+
+        return filename
 
     def pull(self, name: str, identifier: Union[str, int]) -> Dict:
         """
@@ -81,7 +81,7 @@ class LocalStorage:
             )
             raise ValueError(message)
 
-        with open(f"{filename}.pkl", "rb") as file:
+        with open(Path(self._storage_path, f"{filename}.pkl"), "rb") as file:
             data = pickle.load(file)
 
         return data

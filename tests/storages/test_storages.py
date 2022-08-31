@@ -3,6 +3,8 @@ import pickle
 import shutil
 from pathlib import Path
 
+import pytest
+
 from mixver.config import ROOT
 from mixver.storages.local_storage import LocalStorage
 
@@ -11,12 +13,13 @@ class MockArtifact:
     name: str = "LinearRegression"
 
 
-def test_local_storage_creation():
+def test_local_storage_creation(storage_folder):
     """
     Test the creation of a LocalStorage in an exising folder.
     """
-    folder = Path(ROOT, "prueba_storage")
-    os.makedirs(folder)
+    # folder = Path(ROOT, "prueba_storage")
+    # os.makedirs(folder)
+    folder = storage_folder
 
     storage = LocalStorage(folder)
 
@@ -40,20 +43,20 @@ def test_local_storage_creation_new_folder():
     shutil.rmtree(folder)
 
 
-def test_local_storage_push():
+def test_local_storage_push(storage_folder):
     """
     Test saving data into the storage.
     """
-    folder = Path(ROOT, "prueba_storage")
-    os.makedirs(folder)
+    folder = storage_folder
 
     storage = LocalStorage(folder)
-    artifact_path = Path(folder, "artifact.pkl")
-    storage.push(artifact=MockArtifact(), path=artifact_path, metadata={"score": 0.9})
+    name = "artifact"
+    filename = storage.push(artifact=MockArtifact(), name=name, metadata={"score": 0.9})
 
-    assert os.path.isfile(artifact_path)
+    expected_path = Path(folder, f"{filename}.pkl")
+    assert os.path.isfile(expected_path)
 
-    with open(artifact_path, "rb") as file:
+    with open(expected_path, "rb") as file:
         artifact = pickle.load(file)
 
     assert artifact["artifact"].name == "LinearRegression"
@@ -62,24 +65,24 @@ def test_local_storage_push():
     shutil.rmtree(folder)
 
 
-def test_local_storage_pull():
+def test_local_storage_pull(storage_folder):
     """
     Test retrieving data from the storage.
     """
-    folder = Path(ROOT, "prueba_storage")
-    os.makedirs(folder)
+    folder = storage_folder
 
     storage = LocalStorage(folder)
-    artifact_path = Path(folder, "artifact.pkl")
     data = {
         "artifact": MockArtifact(),
         "metadata": {"score": 0.9},
     }
 
-    with open(artifact_path, "wb") as file:
+    with open(Path(folder, f"artifact.pkl"), "wb") as file:
         pickle.dump(data, file)
 
-    saved_artifact = storage.pull("artifact.pkl")
+    # FIXME: Currently, this test is adding an artifact to the folder but the versions
+    # file is empty. Therefore, there is an error reading an empty JSON.
+    saved_artifact = storage.pull("artifact", identifier=1)
 
     assert saved_artifact["artifact"].name == "LinearRegression"
     assert saved_artifact["metadata"]["score"] == 0.9
