@@ -19,3 +19,23 @@ class ArtifactDoesNotExist(Exception):
             self.message = f"The '{name}' artifact doesn't exist"
 
         super().__init__(self.message)
+
+
+class EmptyRegistry(Exception):
+    """
+    Indicates that the user is trying to pull artifacts from an empty registry.
+    """
+
+    def __init__(self) -> None:
+        self.message = "Cannot pull artifacts from an empty storage."
+        super().__init__(self.message)
+
+
+class EmptyTags(Exception):
+    """
+    Indicates that there aren't any tags in the registry.
+    """
+
+    def __init__(self) -> None:
+        self.message = "There aren't any tags in the registry."
+        super().__init__(self.message)

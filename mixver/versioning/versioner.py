@@ -2,9 +2,8 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
-from mixver.versioning.exceptions import ArtifactDoesNotExist
+from mixver.versioning.exceptions import ArtifactDoesNotExist, EmptyRegistry, EmptyTags
 from mixver.versioning.utils import hash
 
 
@@ -129,7 +128,6 @@ class Versioner:
         Args:
             name (str): Artifact's name.
         """
-        # TODO: Remove the artifact from the versions
         with open(Path(self.storage_path, self._version_file), "r") as file:
             version_data = json.load(file)
 
@@ -146,7 +144,6 @@ class Versioner:
         with open(Path(self.storage_path, self._tags_file), "r") as file:
             tags_data = json.load(file)
 
-        print(tags_data)
         for tag in tags_data.keys():
             if hashed_name in tags_data[tag]:
                 del tags_data[tag][hashed_name]
@@ -166,8 +163,11 @@ class Versioner:
         Returns:
             str: Artifact's filepath.
         """
-        with open(Path(self.storage_path, self._version_file), "r") as file:
-            version_data = json.load(file)
+        try:
+            with open(Path(self.storage_path, self._version_file), "r") as file:
+                version_data = json.load(file)
+        except:
+            raise EmptyRegistry()
 
         hashed_name = hash(name)
 
@@ -199,8 +199,11 @@ class Versioner:
         Returns:
             str: Artifact's filepath.
         """
-        with open(Path(self.storage_path, self._tags_file), "r") as file:
-            tags_data = json.load(file)
+        try:
+            with open(Path(self.storage_path, self._tags_file), "r") as file:
+                tags_data = json.load(file)
+        except:
+            raise EmptyTags()
 
         if tag not in tags_data:
             raise ArtifactDoesNotExist(tag, is_tag=True)
