@@ -43,7 +43,7 @@ def test_local_storage_creation_new_folder():
     shutil.rmtree(folder)
 
 
-def test_local_storage_push(storage_folder):
+def test_local_storage_push(storage_folder, mocker):
     """
     Test saving data into the storage.
     """
@@ -51,9 +51,12 @@ def test_local_storage_push(storage_folder):
 
     storage = LocalStorage(folder)
     name = "artifact"
+    mocker.patch(
+        "mixver.storages.local_storage.Versioner.add_artifact", return_value=name
+    )
     filename = storage.push(artifact=MockArtifact(), name=name, metadata={"score": 0.9})
 
-    expected_path = Path(folder, f"{filename}.pkl")
+    expected_path = Path(folder, f"{name}.pkl")
     assert os.path.isfile(expected_path)
 
     with open(expected_path, "rb") as file:
@@ -65,7 +68,7 @@ def test_local_storage_push(storage_folder):
     shutil.rmtree(folder)
 
 
-def test_local_storage_pull(storage_folder):
+def test_local_storage_pull(storage_folder, mocker):
     """
     Test retrieving data from the storage.
     """
@@ -76,12 +79,15 @@ def test_local_storage_pull(storage_folder):
         "artifact": MockArtifact(),
         "metadata": {"score": 0.9},
     }
+    name = "artifact"
 
-    with open(Path(folder, f"artifact.pkl"), "wb") as file:
+    with open(Path(folder, f"{name}.pkl"), "wb") as file:
         pickle.dump(data, file)
 
-    # FIXME: Currently, this test is adding an artifact to the folder but the versions
-    # file is empty. Therefore, there is an error reading an empty JSON.
+    mocker.patch(
+        "mixver.storages.local_storage.Versioner.get_artifact_by_version",
+        return_value=name,
+    )
     saved_artifact = storage.pull("artifact", identifier=1)
 
     assert saved_artifact["artifact"].name == "LinearRegression"
