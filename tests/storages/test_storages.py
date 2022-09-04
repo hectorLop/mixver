@@ -17,8 +17,6 @@ def test_local_storage_creation(storage_folder):
     """
     Test the creation of a LocalStorage in an exising folder.
     """
-    # folder = Path(ROOT, "prueba_storage")
-    # os.makedirs(folder)
     folder = storage_folder
 
     storage = LocalStorage(folder)

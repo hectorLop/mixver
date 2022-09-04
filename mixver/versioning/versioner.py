@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from mixver.versioning.exceptions import ArtifactDoesNotExist, EmptyRegistry, EmptyTags
-from mixver.versioning.utils import hash
 
 
 @dataclass(frozen=True)
@@ -55,18 +54,16 @@ class Versioner:
             except json.decoder.JSONDecodeError:
                 version_data = {}
 
-        hashed_name = hash(name)
-
-        if hashed_name in version_data:
-            versions = version_data[hashed_name].keys()
+        if name in version_data:
+            versions = version_data[name].keys()
             versions = list(map(int, versions))
             new_version = max(versions) + 1
         else:
             new_version = 1
-            version_data[hashed_name] = {}
+            version_data[name] = {}
 
-        filename = f"{hashed_name}_{new_version}"
-        version_data[hashed_name][new_version] = filename
+        filename = f"{name}_{new_version}"
+        version_data[name][new_version] = filename
 
         with open(Path(self.storage_path, self._version_file), "w") as file:
             json.dump(version_data, file)
@@ -77,9 +74,9 @@ class Versioner:
 
             for tag in tags:
                 if tag not in tags_data:
-                    tags_data[tag] = {tag: {hashed_name: {new_version: filename}}}
+                    tags_data[tag] = {tag: {name: {new_version: filename}}}
                 else:
-                    tags_data[tag] = {hashed_name: {new_version: filename}}
+                    tags_data[tag] = {name: {new_version: filename}}
 
         return filename
 
@@ -97,17 +94,15 @@ class Versioner:
         with open(Path(self.storage_path, self._version_file), "r") as file:
             version_data = json.load(file)
 
-        hashed_name = hash(name)
-
-        if hashed_name not in version_data:
+        if name not in version_data:
             raise ArtifactDoesNotExist(name)
 
         if not version:
-            versions = version_data[hashed_name].keys()
+            versions = version_data[name].keys()
             versions = list(map(int, versions))
             version = max(versions)
         else:
-            versions = version_data[hashed_name].keys()
+            versions = version_data[name].keys()
 
             if not version in versions:
                 raise ArtifactDoesNotExist(name)
@@ -116,7 +111,7 @@ class Versioner:
             tags_data = json.load(file)
 
         for tag in tags:
-            tags_data[tag] = {hashed_name: {version: f"{hashed_name}_{version}"}}
+            tags_data[tag] = {name: {version: f"{name}_{version}"}}
 
         with open(Path(self.storage_path, self._tags_file), "w") as file:
             json.dump(tags_data, file)
@@ -131,12 +126,10 @@ class Versioner:
         with open(Path(self.storage_path, self._version_file), "r") as file:
             version_data = json.load(file)
 
-        hashed_name = hash(name)
-
-        if hashed_name not in version_data:
+        if name not in version_data:
             raise ArtifactDoesNotExist(name)
         else:
-            del version_data[hashed_name]
+            del version_data[name]
 
         with open(Path(self.storage_path, self._version_file), "w") as file:
             json.dump(version_data, file)
@@ -145,8 +138,8 @@ class Versioner:
             tags_data = json.load(file)
 
         for tag in tags_data.keys():
-            if hashed_name in tags_data[tag]:
-                del tags_data[tag][hashed_name]
+            if name in tags_data[tag]:
+                del tags_data[tag][name]
 
         with open(Path(self.storage_path, self._tags_file), "w") as file:
             json.dump(tags_data, file)
@@ -169,22 +162,20 @@ class Versioner:
         except:
             raise EmptyRegistry()
 
-        hashed_name = hash(name)
-
-        if hashed_name not in version_data:
+        if name not in version_data:
             raise ArtifactDoesNotExist(name)
 
         if not version:
-            versions = version_data[hashed_name].keys()
+            versions = version_data[name].keys()
             versions = list(map(int, versions))
             version = str(max(versions))
         else:
-            versions = version_data[hashed_name].keys()
+            versions = version_data[name].keys()
 
             if not version in versions:
                 raise ArtifactDoesNotExist(name)
 
-        filename = version_data[hashed_name][version]
+        filename = version_data[name][version]
 
         return filename
 
@@ -208,7 +199,7 @@ class Versioner:
         if tag not in tags_data:
             raise ArtifactDoesNotExist(tag, is_tag=True)
 
-        hashed_name = list(tags_data[tag].keys())[0]
-        filename = list(tags_data[tag][hashed_name].values())[0]
+        name = list(tags_data[tag].keys())[0]
+        filename = list(tags_data[tag][name].values())[0]
 
         return filename

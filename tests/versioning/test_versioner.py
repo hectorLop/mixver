@@ -7,7 +7,6 @@ import pytest
 
 from mixver.config import ROOT
 from mixver.versioning.exceptions import ArtifactDoesNotExist
-from mixver.versioning.utils import hash
 from mixver.versioning.versioner import Versioner
 
 
@@ -58,17 +57,17 @@ def test_versioner_add_new_artifact(test_folder):
 
     versioner = Versioner(storage_path=storage_path)
     filename = versioner.add_artifact("artifact2")
-    hashed_name, version = filename.split("_")
+    name, version = filename.split("_")
 
-    assert hashed_name == hash("artifact2")
+    assert name == "artifact2"
     assert version == "1"
 
     with open(Path(storage_path, ".versions.json"), "r") as file:
         data = json.load(file)
 
-        assert hashed_name in data
-        assert version in data[hashed_name]
-        assert data[hashed_name][version] == filename
+        assert name in data
+        assert version in data[name]
+        assert data[name][version] == filename
 
     shutil.rmtree(storage_path)
 
@@ -81,17 +80,17 @@ def test_versioner_add_existing_artifact(test_folder):
 
     versioner = Versioner(storage_path=storage_path)
     filename = versioner.add_artifact("artifact")
-    hashed_name, version = filename.split("_")
+    name, version = filename.split("_")
 
-    assert hashed_name == expected_name
+    assert name == expected_name
     assert version == "2"
 
     with open(Path(storage_path, ".versions.json"), "r") as file:
         data = json.load(file)
 
-        assert hashed_name in data
-        assert version in data[hashed_name]
-        assert data[hashed_name][version] == filename
+        assert name in data
+        assert version in data[name]
+        assert data[name][version] == filename
 
     shutil.rmtree(storage_path)
 
@@ -104,7 +103,7 @@ def test_update_tags(test_folder):
 
     versioner = Versioner(storage_path=storage_path)
     versioner.update_tags(name="test_artifact", tags=[tag_name])
-    expected_name = hash("test_artifact")
+    expected_name = "test_artifact"
 
     with open(Path(storage_path, ".tags.json"), "r") as file:
         data = json.load(file)
@@ -154,7 +153,7 @@ def test_remove_artifact(test_folder):
     versioner = Versioner(storage_path=storage_path)
     versioner.remove_artifact("artifact")
 
-    name = hash("artifact")
+    name = "artifact"
 
     with open(Path(storage_path, ".versions.json"), "r") as file:
         data = json.load(file)
@@ -189,7 +188,7 @@ def test_get_artifact_by_version(test_folder, version):
     storage_path, _, _ = test_folder
 
     versioner = Versioner(storage_path=storage_path)
-    expected_filename = f"{hash('artifact')}_1"
+    expected_filename = f"artifact_1"
 
     actual_filename = versioner.get_artifact_by_version(
         name="artifact", version=version
@@ -221,7 +220,7 @@ def test_get_artifact_by_tag(test_folder):
     storage_path, _, _ = test_folder
 
     versioner = Versioner(storage_path=storage_path)
-    expected_filename = f"{hash('artifact')}_1"
+    expected_filename = f"artifact_1"
 
     actual_filename = versioner.get_artifact_by_tag(tag="tag_prueba")
 

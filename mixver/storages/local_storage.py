@@ -13,11 +13,11 @@ class LocalStorage:
     Local storage to version ML models.
 
     Attributes:
-        _storage_path (str): Local path to use as storage.
+        storage_path (str): Local path to use as storage.
         _versioner (Versioner): Artifacts versioning manager.
     """
 
-    _storage_path: str
+    storage_path: str
     _versioner: Versioner = field(init=False)
 
     def __post_init__(self) -> None:
@@ -25,15 +25,10 @@ class LocalStorage:
         Create the storage.
         """
         # TODO: Handle complex paths or random names
-        if not os.path.isdir(self._storage_path):
-            os.mkdir(self._storage_path)
+        if not os.path.isdir(self.storage_path):
+            os.mkdir(self.storage_path)
 
-        self._versioner = Versioner(storage_path=self._storage_path)
-
-    @property
-    def storage_path(self):
-        """Getter for _storage_path."""
-        return self._storage_path
+        self._versioner = Versioner(storage_path=self.storage_path)
 
     def _create_storage(self) -> str:
         """
@@ -43,12 +38,12 @@ class LocalStorage:
             path (str): Storage path.
         """
         # TODO: Handle complex paths or random names
-        if not os.path.isdir(self._storage_path):
-            os.mkdir(self._storage_path)
+        if not os.path.isdir(self.storage_path):
+            os.mkdir(self.storage_path)
 
     def push(
         self, artifact: Any, name: str, metadata: Dict, tags: list[str] = []
-    ) -> None:
+    ) -> str:
         """
         Save data into the storage.
         """
@@ -59,7 +54,7 @@ class LocalStorage:
 
         filename = self._versioner.add_artifact(name=name, tags=tags)
 
-        with open(Path(self._storage_path, f"{filename}.pkl"), "wb") as file:
+        with open(Path(self.storage_path, f"{filename}.pkl"), "wb") as file:
             pickle.dump(data, file)
 
         return filename
@@ -81,7 +76,7 @@ class LocalStorage:
             )
             raise ValueError(message)
 
-        with open(Path(self._storage_path, f"{filename}.pkl"), "rb") as file:
+        with open(Path(self.storage_path, f"{filename}.pkl"), "rb") as file:
             data = pickle.load(file)
 
         return data
