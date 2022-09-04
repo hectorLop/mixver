@@ -43,8 +43,12 @@ def test_local_storage():
             assert tag in tags_data
             assert tags_data[tag] == {name: {"1": f"{name}_1"}}
 
-    for identifier in [1, "latest", "validation"]:
-        artifact = storage.pull(name=name, identifier=identifier)
+    artifact = storage.pull(name=name, version="1")
+    assert isinstance(artifact["artifact"], MLModel)
+    assert artifact["metadata"] == metadata
+
+    for tag in ["latest", "validation"]:
+        artifact = storage.pull(tag=tag)
         assert isinstance(artifact["artifact"], MLModel)
         assert artifact["metadata"] == metadata
 

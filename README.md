@@ -98,9 +98,9 @@ latest_model = storage.pull(tag="latest")
 best_model_training = storage.pull(tag="training")
 
 # Get the version 1 of "test_model"
-model_version_1 = storage.pull(name_version=("test_model", 1))
+model_version_1 = storage.pull(name="test_model", version="1")
 # Get the latest version of "test_model"
-model_latest_version = storage.pull(name_version=("test_model"))
+model_latest_version = storage.pull(name="test_model")
 ```
 
 

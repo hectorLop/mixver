@@ -86,7 +86,7 @@ def test_local_storage_pull(storage_folder, mocker):
         "mixver.storages.local_storage.Versioner.get_artifact_by_version",
         return_value=name,
     )
-    saved_artifact = storage.pull("artifact", identifier=1)
+    saved_artifact = storage.pull(name="artifact", version="1")
 
     assert saved_artifact["artifact"].name == "LinearRegression"
     assert saved_artifact["metadata"]["score"] == 0.9

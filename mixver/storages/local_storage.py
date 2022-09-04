@@ -2,7 +2,7 @@ import os
 import pickle
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, Tuple, Union
 
 from mixver.versioning.versioner import Versioner
 
@@ -59,16 +59,16 @@ class LocalStorage:
 
         return filename
 
-    def pull(self, name: str, identifier: Union[str, int]) -> Dict:
+    def pull(self, tag: str = "", name: str = "", version: str = "") -> Dict:
         """
         Retrieve data from the storage.
         """
-        if isinstance(identifier, int):
+        if tag:
+            filename = self._versioner.get_artifact_by_tag(tag=tag)
+        elif name:
             filename = self._versioner.get_artifact_by_version(
-                name=name, version=str(identifier)
+                name=name, version=version
             )
-        elif isinstance(identifier, str):
-            filename = self._versioner.get_artifact_by_tag(tag=identifier)
         else:
             message = (
                 "The identifier must be an integer to identify an artifact by its version or "
