@@ -69,14 +69,20 @@ class Versioner:
             json.dump(version_data, file)
 
         if tags:
-            with open(self._tags_file, "r") as file:
-                tags_data = json.load(file)
+            with open(Path(self.storage_path, self._tags_file), "r") as file:
+                try:
+                    tags_data = json.load(file)
+                except json.decoder.JSONDecodeError:
+                    tags_data = {}
 
             for tag in tags:
                 if tag not in tags_data:
-                    tags_data[tag] = {tag: {name: {new_version: filename}}}
+                    tags_data[tag] = {name: {new_version: filename}}
                 else:
                     tags_data[tag] = {name: {new_version: filename}}
+
+            with open(Path(self.storage_path, self._tags_file), "w") as file:
+                json.dump(tags_data, file)
 
         return filename
 

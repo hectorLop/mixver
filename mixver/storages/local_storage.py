@@ -68,7 +68,7 @@ class LocalStorage:
                 name=name, version=str(identifier)
             )
         elif isinstance(identifier, str):
-            filename = self._versioner.get_artifact_by_tag(name=name, tag=identifier)
+            filename = self._versioner.get_artifact_by_tag(tag=identifier)
         else:
             message = (
                 "The identifier must be an integer to identify an artifact by its version or "
