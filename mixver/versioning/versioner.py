@@ -35,6 +35,29 @@ class Versioner:
         if not os.path.isfile(tags_filepath):
             open(tags_filepath, "a").close()
 
+    def _get_last_version(self, versions_data: dict, name: str) -> int:
+        versions = versions_data[name].keys()
+        versions = list(map(int, versions))
+        return max(versions)
+
+    def _read_file(self, file: str) -> dict:
+        with open(Path(self.storage_path, file), "r") as file:
+            try:
+                data = json.load(file)
+            except json.decoder.JSONDecodeError:
+                data = {}
+
+        return data
+
+    def _modify_tags_data(self, tags: list[str], name: str, version: int):
+        tags_data = self._read_file(self._tags_file)
+
+        for tag in tags:
+            tags_data[tag] = {name: {str(version): f"{name}_{version}"}}
+
+        with open(Path(self.storage_path, self._tags_file), "w") as file:
+            json.dump(tags_data, file)
+
     def add_artifact(self, name: str, tags: list[str] = []) -> str:
         """
         Add an artifact to the system. In the case that the artifact already
@@ -47,17 +70,10 @@ class Versioner:
         Returns:
             str: Artifact's filename.
         """
-
-        with open(Path(self.storage_path, self._version_file), "r") as file:
-            try:
-                version_data = json.load(file)
-            except json.decoder.JSONDecodeError:
-                version_data = {}
+        version_data = self._read_file(self._version_file)
 
         if name in version_data:
-            versions = version_data[name].keys()
-            versions = list(map(int, versions))
-            new_version = max(versions) + 1
+            new_version = self._get_last_version(version_data, name) + 1
         else:
             new_version = 1
             version_data[name] = {}
@@ -69,20 +85,7 @@ class Versioner:
             json.dump(version_data, file)
 
         if tags:
-            with open(Path(self.storage_path, self._tags_file), "r") as file:
-                try:
-                    tags_data = json.load(file)
-                except json.decoder.JSONDecodeError:
-                    tags_data = {}
-
-            for tag in tags:
-                if tag not in tags_data:
-                    tags_data[tag] = {name: {new_version: filename}}
-                else:
-                    tags_data[tag] = {name: {new_version: filename}}
-
-            with open(Path(self.storage_path, self._tags_file), "w") as file:
-                json.dump(tags_data, file)
+            self._modify_tags_data(tags=tags, name=name, version=new_version)
 
         return filename
 
@@ -104,23 +107,14 @@ class Versioner:
             raise ArtifactDoesNotExist(name)
 
         if not version:
-            versions = version_data[name].keys()
-            versions = list(map(int, versions))
-            version = max(versions)
+            version = self._get_last_version(version_data, name)
         else:
             versions = version_data[name].keys()
 
             if not version in versions:
                 raise ArtifactDoesNotExist(name)
 
-        with open(Path(self.storage_path, self._tags_file), "r") as file:
-            tags_data = json.load(file)
-
-        for tag in tags:
-            tags_data[tag] = {name: {version: f"{name}_{version}"}}
-
-        with open(Path(self.storage_path, self._tags_file), "w") as file:
-            json.dump(tags_data, file)
+        self._modify_tags_data(tags=tags, name=name, version=version)
 
     def remove_artifact(self, name: str) -> None:
         """
@@ -162,19 +156,17 @@ class Versioner:
         Returns:
             str: Artifact's filepath.
         """
-        try:
-            with open(Path(self.storage_path, self._version_file), "r") as file:
+        with open(Path(self.storage_path, self._version_file), "r") as file:
+            try:
                 version_data = json.load(file)
-        except:
-            raise EmptyRegistry()
+            except json.decoder.JSONDecodeError:
+                raise EmptyRegistry()
 
         if name not in version_data:
             raise ArtifactDoesNotExist(name)
 
         if not version:
-            versions = version_data[name].keys()
-            versions = list(map(int, versions))
-            version = str(max(versions))
+            version = str(self._get_last_version(version_data, name))
         else:
             versions = version_data[name].keys()
 
