@@ -17,7 +17,6 @@ pylint = "^2.14.5"
 pytest = "^7.1.2"
 pytest-mock = "^3.8.2"
 
-
 [tool.pylint.BASIC]
 min-public-methods = 0
 
@@ -34,16 +33,6 @@ min-public-methods = 0
 
 [tool.isort]
 profile = "black"
-
-[tool.mypy]
-strict = true
-pretty = true
-show_error_codes = true
-show_error_context = true
-implicit_reexport = true
-namespace_packages = true
-plugins = "pydantic.mypy"
-
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
