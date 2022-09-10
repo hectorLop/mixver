@@ -3,13 +3,13 @@ import os
 import shutil
 from pathlib import Path
 
-import pytest
-
 from mixver.config import ROOT
 from mixver.storages.local_storage import LocalStorage
 
 
 class MLModel:
+    """ML model artifact."""
+
     model_name: str = "LogisticRegression"
 
 
@@ -30,13 +30,13 @@ def test_local_storage():
     assert os.path.isfile(actual_filepath)
     assert actual_filepath == expected_filename
 
-    with open(Path(folder, ".versions.json"), "r") as file:
+    with open(Path(folder, ".versions.json"), "r", encoding="utf8") as file:
         versions_data = json.load(file)
 
         assert name in versions_data
         assert versions_data[name] == {"1": f"{name}_1"}
 
-    with open(Path(folder, ".tags.json"), "r") as file:
+    with open(Path(folder, ".tags.json"), "r", encoding="utf8") as file:
         tags_data = json.load(file)
 
         for tag in tags:

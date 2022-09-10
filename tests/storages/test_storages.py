@@ -3,13 +3,13 @@ import pickle
 import shutil
 from pathlib import Path
 
-import pytest
-
 from mixver.config import ROOT
 from mixver.storages.local_storage import LocalStorage
 
 
 class MockArtifact:
+    """Mocked artifact."""
+
     name: str = "LinearRegression"
 
 
@@ -52,7 +52,7 @@ def test_local_storage_push(storage_folder, mocker):
     mocker.patch(
         "mixver.storages.local_storage.Versioner.add_artifact", return_value=name
     )
-    filename = storage.push(artifact=MockArtifact(), name=name, metadata={"score": 0.9})
+    _ = storage.push(artifact=MockArtifact(), name=name, metadata={"score": 0.9})
 
     expected_path = Path(folder, f"{name}.pkl")
     assert os.path.isfile(expected_path)

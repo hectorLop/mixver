@@ -17,7 +17,7 @@ def test_versioner_new_storage():
     storage_path = Path(ROOT, "prueba_versioner")
     os.makedirs(storage_path)
 
-    versioner = Versioner(storage_path=storage_path)
+    _ = Versioner(storage_path=storage_path)
 
     assert os.path.isfile(Path(storage_path, ".versions.json"))
     assert os.path.isfile(Path(storage_path, ".tags.json"))
@@ -31,16 +31,16 @@ def test_versioner_existant_storage(test_folder):
     """
     storage_path, expected_name, tag_name = test_folder
 
-    versioner = Versioner(storage_path=storage_path)
+    _ = Versioner(storage_path=storage_path)
 
     # Check that the versioner hasn't truncated the existing files
-    with open(Path(storage_path, ".versions.json"), "r") as file:
+    with open(Path(storage_path, ".versions.json"), "r", encoding="utf8") as file:
         data = json.load(file)
         assert expected_name in data.keys()
         assert list(data[expected_name].keys())[0] == "1"
         assert data[expected_name]["1"] == f"{expected_name}_1"
 
-    with open(Path(storage_path, ".tags.json"), "r") as file:
+    with open(Path(storage_path, ".tags.json"), "r", encoding="utf8") as file:
         data = json.load(file)
         assert list(data.keys())[0] == tag_name
         assert list(data[tag_name].keys())[0] == expected_name
@@ -62,7 +62,7 @@ def test_versioner_add_new_artifact(test_folder):
     assert name == "artifact2"
     assert version == "1"
 
-    with open(Path(storage_path, ".versions.json"), "r") as file:
+    with open(Path(storage_path, ".versions.json"), "r", encoding="utf8") as file:
         data = json.load(file)
 
         assert name in data
@@ -85,7 +85,7 @@ def test_versioner_add_existing_artifact(test_folder):
     assert name == expected_name
     assert version == "2"
 
-    with open(Path(storage_path, ".versions.json"), "r") as file:
+    with open(Path(storage_path, ".versions.json"), "r", encoding="utf8") as file:
         data = json.load(file)
 
         assert name in data
@@ -105,7 +105,7 @@ def test_update_tags(test_folder):
     versioner.update_tags(name="test_artifact", tags=[tag_name])
     expected_name = "test_artifact"
 
-    with open(Path(storage_path, ".tags.json"), "r") as file:
+    with open(Path(storage_path, ".tags.json"), "r", encoding="utf8") as file:
         data = json.load(file)
 
         assert tag_name in data
@@ -155,11 +155,11 @@ def test_remove_artifact(test_folder):
 
     name = "artifact"
 
-    with open(Path(storage_path, ".versions.json"), "r") as file:
+    with open(Path(storage_path, ".versions.json"), "r", encoding="utf8") as file:
         data = json.load(file)
         assert name not in data
 
-    with open(Path(storage_path, ".tags.json"), "r") as file:
+    with open(Path(storage_path, ".tags.json"), "r", encoding="utf8") as file:
         data = json.load(file)
         assert data["tag_prueba"] == {}
 
@@ -188,7 +188,7 @@ def test_get_artifact_by_version(test_folder, version):
     storage_path, _, _ = test_folder
 
     versioner = Versioner(storage_path=storage_path)
-    expected_filename = f"artifact_1"
+    expected_filename = "artifact_1"
 
     actual_filename = versioner.get_artifact_by_version(
         name="artifact", version=version
@@ -220,7 +220,7 @@ def test_get_artifact_by_tag(test_folder):
     storage_path, _, _ = test_folder
 
     versioner = Versioner(storage_path=storage_path)
-    expected_filename = f"artifact_1"
+    expected_filename = "artifact_1"
 
     actual_filename = versioner.get_artifact_by_tag(tag="tag_prueba")
 
