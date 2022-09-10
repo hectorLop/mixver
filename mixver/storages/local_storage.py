@@ -2,7 +2,7 @@ import os
 import pickle
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, Optional
 
 from mixver.versioning.versioner import Versioner
 
@@ -42,7 +42,7 @@ class LocalStorage:
             os.mkdir(self.storage_path)
 
     def push(
-        self, artifact: Any, name: str, metadata: Dict, tags: list[str] = []
+        self, artifact: Any, name: str, metadata: Dict, tags: Optional[list[str]] = None
     ) -> str:
         """
         Save data into the storage.

@@ -1,7 +1,9 @@
 import json
 import os
 from dataclasses import dataclass, field
+from json.decoder import JSONDecodeError
 from pathlib import Path
+from typing import Optional
 
 from mixver.versioning.exceptions import ArtifactDoesNotExist, EmptyRegistry, EmptyTags
 
@@ -30,18 +32,20 @@ class Versioner:
         tags_filepath = Path(self.storage_path, self._tags_file)
 
         if not os.path.isfile(version_filepath):
-            open(version_filepath, "a").close()
+            with open(version_filepath, "a", encoding="utf8"):
+                pass
 
         if not os.path.isfile(tags_filepath):
-            open(tags_filepath, "a").close()
+            with open(tags_filepath, "a", encoding="utf8"):
+                pass
 
     def _get_last_version(self, versions_data: dict, name: str) -> int:
         versions = versions_data[name].keys()
         versions = list(map(int, versions))
         return max(versions)
 
-    def _read_file(self, file: str) -> dict:
-        with open(Path(self.storage_path, file), "r") as file:
+    def _read_file(self, filename: str) -> dict:
+        with open(Path(self.storage_path, filename), "r", encoding="utf8") as file:
             try:
                 data = json.load(file)
             except json.decoder.JSONDecodeError:
@@ -55,10 +59,12 @@ class Versioner:
         for tag in tags:
             tags_data[tag] = {name: {str(version): f"{name}_{version}"}}
 
-        with open(Path(self.storage_path, self._tags_file), "w") as file:
+        with open(
+            Path(self.storage_path, self._tags_file), "w", encoding="utf8"
+        ) as file:
             json.dump(tags_data, file)
 
-    def add_artifact(self, name: str, tags: list[str] = []) -> str:
+    def add_artifact(self, name: str, tags: Optional[list[str]] = None) -> str:
         """
         Add an artifact to the system. In the case that the artifact already
         exists, its version will be upgraded.
@@ -81,7 +87,9 @@ class Versioner:
         filename = f"{name}_{new_version}"
         version_data[name][new_version] = filename
 
-        with open(Path(self.storage_path, self._version_file), "w") as file:
+        with open(
+            Path(self.storage_path, self._version_file), "w", encoding="utf8"
+        ) as file:
             json.dump(version_data, file)
 
         if tags:
@@ -100,7 +108,9 @@ class Versioner:
             version (str): Artifact's version. Default is empty, which means the
                 latest version of the artifact will be used.
         """
-        with open(Path(self.storage_path, self._version_file), "r") as file:
+        with open(
+            Path(self.storage_path, self._version_file), "r", encoding="utf8"
+        ) as file:
             version_data = json.load(file)
 
         if name not in version_data:
@@ -123,25 +133,33 @@ class Versioner:
         Args:
             name (str): Artifact's name.
         """
-        with open(Path(self.storage_path, self._version_file), "r") as file:
+        with open(
+            Path(self.storage_path, self._version_file), "r", encoding="utf8"
+        ) as file:
             version_data = json.load(file)
 
         if name not in version_data:
             raise ArtifactDoesNotExist(name)
-        else:
-            del version_data[name]
 
-        with open(Path(self.storage_path, self._version_file), "w") as file:
+        del version_data[name]
+
+        with open(
+            Path(self.storage_path, self._version_file), "w", encoding="utf8"
+        ) as file:
             json.dump(version_data, file)
 
-        with open(Path(self.storage_path, self._tags_file), "r") as file:
+        with open(
+            Path(self.storage_path, self._tags_file), "r", encoding="utf8"
+        ) as file:
             tags_data = json.load(file)
 
         for tag in tags_data.keys():
             if name in tags_data[tag]:
                 del tags_data[tag][name]
 
-        with open(Path(self.storage_path, self._tags_file), "w") as file:
+        with open(
+            Path(self.storage_path, self._tags_file), "w", encoding="utf8"
+        ) as file:
             json.dump(tags_data, file)
 
     def get_artifact_by_version(self, name: str, version: str = "") -> str:
@@ -156,11 +174,13 @@ class Versioner:
         Returns:
             str: Artifact's filepath.
         """
-        with open(Path(self.storage_path, self._version_file), "r") as file:
+        with open(
+            Path(self.storage_path, self._version_file), "r", encoding="utf8"
+        ) as file:
             try:
                 version_data = json.load(file)
-            except json.decoder.JSONDecodeError:
-                raise EmptyRegistry()
+            except JSONDecodeError as exc:
+                raise EmptyRegistry() from exc
 
         if name not in version_data:
             raise ArtifactDoesNotExist(name)
@@ -189,10 +209,12 @@ class Versioner:
             str: Artifact's filepath.
         """
         try:
-            with open(Path(self.storage_path, self._tags_file), "r") as file:
+            with open(
+                Path(self.storage_path, self._tags_file), "r", encoding="utf8"
+            ) as file:
                 tags_data = json.load(file)
-        except:
-            raise EmptyTags()
+        except Exception as exc:
+            raise EmptyTags() from exc
 
         if tag not in tags_data:
             raise ArtifactDoesNotExist(tag, is_tag=True)
