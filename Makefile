@@ -3,7 +3,7 @@ TEST_DIR = tests
 CHECK_DIRS = $(SRC_DIR) $(TEST_DIR)
 
 .PHONY: check
-check: format-check lint type-check test ## Launch all the checks (formatting, linting, type checking)
+check: format-check lint test ## Launch all the checks (formatting, linting, type checking)
 
 .PHONY: format
 format: ## Format repository code
@@ -22,6 +22,6 @@ and keyword arguments in child dataclass(kw_only=True) which should be ok since 
 	poetry run pylint -j 0 -d unexpected-keyword-arg $(SRC_DIR)
 	poetry run pylint -j 0 -d missing-function-docstring $(TEST_DIR)
 
-.PHONY: type-check
-type-check: ## Launch the type checking tool
-	poetry run mypy $(CHECK_DIRS)
+.PHONY: test
+test: ## Launch the tests
+	poetry run pytest -vv --doctest-modules $(TEST_DIR)
