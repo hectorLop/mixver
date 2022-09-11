@@ -30,17 +30,6 @@ class LocalStorage:
 
         self._versioner = Versioner(storage_path=self.storage_path)
 
-    def _create_storage(self) -> str:
-        """
-        Assign a folder to be used as the local storage.
-
-        Args:
-            path (str): Storage path.
-        """
-        # TODO: Handle complex paths or random names
-        if not os.path.isdir(self.storage_path):
-            os.mkdir(self.storage_path)
-
     def push(
         self, artifact: Any, name: str, metadata: Dict, tags: Optional[list[str]] = None
     ) -> str:

@@ -40,11 +40,30 @@ class Versioner:
                 pass
 
     def _get_last_version(self, versions_data: dict, name: str) -> int:
+        """
+        Get the latest version of an artifact.
+
+        Args:
+            versions_data (dict): Artifacts' versioning data.
+            name (str): Artifact's name
+
+        Returns:
+            int: Latest artifact version.
+        """
         versions = versions_data[name].keys()
         versions = list(map(int, versions))
         return max(versions)
 
     def _read_file(self, filename: str) -> dict:
+        """
+        Read a json file.
+
+        Args:
+            filename (str): JSON filename.
+
+        Returns:
+            dict: File content.
+        """
         with open(Path(self.storage_path, filename), "r", encoding="utf8") as file:
             try:
                 data = json.load(file)
@@ -53,7 +72,15 @@ class Versioner:
 
         return data
 
-    def _modify_tags_data(self, tags: list[str], name: str, version: int):
+    def _modify_tags_data(self, tags: list[str], name: str, version: int) -> None:
+        """
+        Modify the tags file.
+
+        Args:
+            tags (list[str]): List of tags to be modified.
+            name (str): Artifact's name.
+            version (int): Artifact's version.
+        """
         tags_data = self._read_file(self._tags_file)
 
         for tag in tags:
