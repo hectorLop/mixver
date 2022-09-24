@@ -1,0 +1,17 @@
+{
+    "training": {
+        "linear_regression": {
+            "1": "models_storage/linear_regressor_1"
+        }
+    },
+    "validation": {
+        "xgboost_regressor": {
+            "2": "models_storage/xgboost_regressor_2"
+        }
+    },
+    "production": {
+        "xgboost_regressor": {
+            "2": "models_storage/xgboost_regressor_2"
+        }
+    }
+}

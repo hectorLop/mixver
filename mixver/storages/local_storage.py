@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from mixver.cli.visualizer import show_tags
 from mixver.versioning.versioner import Versioner
 
 
@@ -69,3 +70,10 @@ class LocalStorage:
             data = pickle.load(file)
 
         return data
+
+    def visualize(self):
+        """
+        Visualize the tags and their associated artifacts.
+        """
+        tags, names, versions, paths = self._versioner.get_tags_data_for_visualization()
+        show_tags(tags, names, versions, paths)

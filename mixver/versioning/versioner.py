@@ -236,3 +236,25 @@ class Versioner:
             filename = list(tags_data[tag][name].values())[0]
 
         return filename
+
+    def get_tags_data_for_visualization(self):
+        tags, names, versions, paths = [], [], [], []
+
+        with JSONManager(
+            file_path=Path(self.storage_path, self._tags_file),
+            write=False,
+            raise_exceptions=EmptyTags(),
+        ) as tags_data:
+            for tag in tags_data.keys():
+                tags.append(tag)
+
+                name = list(tags_data[tag].keys())[0]
+                names.append(name)
+
+                version = list(tags_data[tag][name].keys())[0]
+                versions.append(version)
+
+                filename = tags_data[tag][name][version]
+                paths.append(filename)
+
+            return tags, names, versions, paths
