@@ -103,12 +103,21 @@ model_version_1 = storage.pull(name="test_model", version="1")
 model_latest_version = storage.pull(name="test_model")
 ```
 
+### Visualize the stored artifacts
+```python
+storage = LocalStorage(...)
+storage.visualize()
+```
+
+An output example would be the following:
+
+<img src="images/cli_example.png" alt="Logo" width="600" height="125">
 
 <!-- ROADMAP -->
 ## Roadmap
 
 - [ ] Show the models and their latest versions in the CLI
-- [ ] Show the tags and their corresponding models in the CLI
+- [X] Show the tags and their corresponding models in the CLI
 - [ ] Add AWS S3 storage
 - [ ] Add Google Drive storage
 
