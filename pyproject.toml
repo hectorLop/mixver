@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mixver"
-version = "0.1.0"
+version = "0.1.1"
 description = "Custom versioning of ML models"
 authors = ["hectorLop <lopez.almazan.hector@gmail.com>"]
 
