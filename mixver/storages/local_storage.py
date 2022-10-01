@@ -1,15 +1,16 @@
 import os
 import pickle
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from mixver.cli.visualizer import show_tags
+from mixver.storages.storage import Storage
 from mixver.versioning.versioner import Versioner
 
 
 @dataclass
-class LocalStorage:
+class LocalStorage(Storage):
     """
     Local storage to version ML models.
 
@@ -19,7 +20,6 @@ class LocalStorage:
     """
 
     storage_path: str
-    _versioner: Versioner = field(init=False)
 
     def __post_init__(self) -> None:
         """
