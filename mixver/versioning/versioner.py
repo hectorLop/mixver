@@ -238,6 +238,9 @@ class Versioner:
         return filename
 
     def get_tags_data_for_visualization(self):
+        """
+        Retrieves the tags file data ready for visualization.
+        """
         tags, names, versions, paths = [], [], [], []
 
         with JSONManager(
